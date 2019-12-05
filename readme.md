@@ -4,8 +4,9 @@ If you are tired of piping your secrets manually through a base64 decoder, this 
 Download the binary from the /binaries dir (or from the Releases page) and place it in your path.
 
 ```bash
-k8decode my-super-secret-secret
+k8decode {secret-name} [-n] {namespace}
 ```
+The namespace flags default value is "default". Use -n to specify an alternate namespace for the secret. 
 
 For `tab` autocompletion, download the `k8decode_completion.sh` bash completion script included in this repo
 
