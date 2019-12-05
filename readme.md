@@ -6,7 +6,7 @@ Download the binary from the /binaries dir (or from the Releases page) and place
 ```bash
 k8decode {secret-name} [-n] {namespace}
 ```
-The namespace flags default value is "default". Use -n to specify an alternate namespace for the secret. 
+The namespace flag's default value is `default`. Use `-n` to specify an alternate namespace for the secret. 
 
 For `tab` autocompletion, download the `k8decode_completion.sh` bash completion script included in this repo
 
