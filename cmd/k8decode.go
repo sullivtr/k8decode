@@ -1,46 +1,32 @@
 package cmd
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
-	"time"
 
-	"github.com/briandowns/spinner"
-	"github.com/spf13/cobra"
 	"github.com/sullivtr/k8decode/internal/models"
-	"github.com/sullivtr/k8decode/internal/runner"
-	"gopkg.in/yaml.v2"
+
+	"github.com/spf13/cobra"
+	"github.com/sullivtr/k8decode/internal/executor"
+	"github.com/sullivtr/k8decode/internal/loader"
+	"github.com/sullivtr/k8decode/internal/secret"
 )
 
 var namespace string
-var cmdRunner *runner.Runner
+var cmdRunner executor.CommandRunner
 
 var K8DecodeCmd = &cobra.Command{
 	Use:   "k8decode",
 	Short: "Decodes the base64 encoded secrets from a Kubernetes secrets yaml output",
 	Long:  `k8decode is a CLI tool for easily reading Kubernetes secrets without having to manually pipe individual secrets into a base64 decoder.`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) <= 0 {
-			return errors.New("Error: please provide a valid secret name")
-		}
-		return nil
+		return validateArgs(args)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		s := initSpinner()
-		s.Start()
-
-		secretName := args[0]
-
-		secret, err := getSecret(runner.RunCommand{}, namespace, secretName)
-		if err != nil {
-			log.Fatalf("Unable to get secret, %s, in namespace: %s", secretName, namespace)
+		if _, err := k8decode(args); err != nil {
+			log.Fatalf("Error: %v", err)
 		}
-
-		// fmt.Println()
-		printDecodedSecret(secret)
-		s.Stop()
 	},
 }
 
@@ -48,34 +34,28 @@ func init() {
 	K8DecodeCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the namespace the secret lives in")
 }
 
-func initSpinner() *spinner.Spinner {
-	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
-	s.Color("green")
-	s.Prefix = "[ DECODING SECRETS ] [ "
-	s.Suffix = " ]"
-
-	return s
+func validateArgs(args []string) error {
+	if len(args) <= 0 || args[0] == "" {
+		return errors.New("Error: please provide a valid secret name")
+	}
+	return nil
 }
 
-func getSecret(r runner.Runner, namespace, secretName string) (*models.Secret, error) {
-	out, err := r.Run("kubectl", "get", "secret", "-n", namespace, secretName, "-o", "yaml")
+func k8decode(args []string) (*models.Secret, error) {
+	l := loader.NewSpinner()
+	l.Start()
+
+	secretName := args[0]
+
+	if cmdRunner == nil {
+		cmdRunner = &executor.CmdRunner{}
+	}
+	s, err := secret.GetSecret(cmdRunner, namespace, secretName)
 	if err != nil {
-		return nil, fmt.Errorf("Error getting secret " + err.Error())
+		return nil, fmt.Errorf("Unable to get secret, %s, in namespace: %s", secretName, namespace)
 	}
 
-	m := models.Secret{}
-
-	err = yaml.Unmarshal(out, &m)
-	if err != nil {
-		return nil, fmt.Errorf("Error parsing yaml %s", err)
-	}
-	return &m, nil
-}
-
-func printDecodedSecret(secret *models.Secret) {
-	fmt.Println()
-	for k := range secret.Data {
-		data, _ := base64.StdEncoding.DecodeString(secret.Data[k])
-		fmt.Printf("\033[32m%s : \033[37m%v\n", k, string(data))
-	}
+	secret.PrintDecodedSecret(s)
+	l.Stop()
+	return s, nil
 }

@@ -1,4 +1,4 @@
-package runner
+package executor
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestRunCommand(t *testing.T) {
-	runner := RunCommand{}
+	runner := CmdRunner{}
 	out, err := runner.Run("echo", "hello")
 	assert.NilError(t, err)
 	assert.Equal(t, string(out), "hello\n")
