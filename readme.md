@@ -1,7 +1,8 @@
 # Auto decode kubernetes secrets 
 
-If you are tired of piping your secrets manually through a base64 decoder, this tool is for you.
-Download the binary from the releases page and place it in your path.
+
+<img src="secretdecode.gif" width="1000"/>
+<!-- ![Demo](secretdecode.gif) -->
 
 ```bash
 k8decode {secret-name} [-n] {namespace}
