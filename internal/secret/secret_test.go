@@ -1,16 +1,13 @@
 package secret
 
 import (
-	"bytes"
 	"encoding/base64"
-	"io"
-	"os"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/sullivtr/k8decode/internal/executor"
 	"github.com/sullivtr/k8decode/internal/models"
+	"github.com/sullivtr/k8decode/internal/reader"
 )
 
 type SecretTestSuite struct {
@@ -44,7 +41,7 @@ func (suite SecretTestSuite) TestPrintDecodedSecret() {
 	}
 	s.Data["Key"] = base64.StdEncoding.EncodeToString([]byte("value"))
 
-	res := readStdOut(func() {
+	res := reader.ReadStdOut(func() {
 		PrintDecodedSecret(&s)
 	})
 	suite.Contains(res, "Key")
@@ -71,28 +68,4 @@ notyaml
 `
 	out := []byte(secret)
 	return out, nil
-}
-
-func readStdOut(f func()) string {
-	r, w, _ := os.Pipe()
-	stdout := os.Stdout
-	stderr := os.Stderr
-	defer func() {
-		os.Stdout = stdout
-		os.Stderr = stderr
-	}()
-	os.Stdout = w
-	out := make(chan string)
-	wg := new(sync.WaitGroup)
-	wg.Add(1)
-	go func() {
-		var buf bytes.Buffer
-		wg.Done()
-		_, _ = io.Copy(&buf, r)
-		out <- buf.String()
-	}()
-	wg.Wait()
-	f()
-	w.Close()
-	return <-out
 }

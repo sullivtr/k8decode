@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/sullivtr/k8decode/internal/executor"
 	"github.com/sullivtr/k8decode/internal/models"
+	"github.com/sullivtr/k8decode/internal/reader"
 	"github.com/sullivtr/k8decode/mocks"
 	"gopkg.in/yaml.v2"
 )
@@ -78,4 +79,39 @@ func (suite K8decodeTestSuite) TestK8DecodeNoSecretName() {
 	_, err := k8decode(cliArgs)
 	suite.Contains(err.Error(), "Unable to get secret, , in namespace: testns. Error: Error getting secret")
 	suite.NotNil(err)
+}
+
+func (suite K8decodeTestSuite) TestCobraCommandSuccess() {
+	cmdr := new(mocks.CommandRunner)
+	namespace = "testns"
+	runnerArgs := []interface{}{"kubectl", "get", "secret", "-n", "testns", "testsecret", "-o", "yaml"}
+	cmdr.On("Run", runnerArgs...).Return([]byte(validYaml), nil)
+	cmdRunner = cmdr
+
+	K8DecodeCmd.SetArgs([]string{"testsecret"})
+	err := K8DecodeCmd.Execute()
+	suite.Nil(err)
+}
+
+func (suite K8decodeTestSuite) TestCobraCommandError() {
+	cmdr := new(mocks.CommandRunner)
+	namespace = "testns"
+	runnerArgs := []interface{}{"kubectl", "get", "secret", "-n", "testns", "testsecret", "-o", "yaml"}
+	cmdr.On("Run", runnerArgs...).Return(nil, fmt.Errorf("Test Error"))
+	cmdRunner = cmdr
+
+	K8DecodeCmd.SetArgs([]string{"testsecret"})
+
+	res := reader.ReadStdOut(func() {
+		_ = K8DecodeCmd.Execute()
+	})
+	suite.Contains(res, "Error:")
+	suite.Contains(res, "Unable to get secret")
+}
+
+func (suite K8decodeTestSuite) TestCobraCommandArgsError() {
+	K8DecodeCmd.SetArgs([]string{""})
+	err := K8DecodeCmd.Execute()
+	suite.Contains(err.Error(), "please provide a valid secret name")
+	suite.Error(err)
 }
