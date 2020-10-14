@@ -1,5 +1,16 @@
-# Auto decode kubernetes secrets 
+<div align="center">
+  
+  <h1 align="center">K8decode: decode kubernetes secrets</h1>
 
+  [![test][test-image]][test-url]
+  [![coverage][cov-image]][cov-url]
+  
+  [test-image]: https://github.com/sullivtr/k8decode/workflows/test/badge.svg
+  [test-url]: https://github.com/sullivtr/k8decode/actions?query=workflow%3Atest
+  [cov-image]: https://codecov.io/gh/sullivtr/k8decode/branch/master/graph/badge.svg?token=6HISPGX35J
+  [cov-url]: https://github.com/sullivtr/k8decode/actions?query=workflow%3Atest
+
+</div>
 
 <img src="secretdecode.gif" width="1000"/>
 <!-- ![Demo](secretdecode.gif) -->
