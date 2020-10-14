@@ -7,11 +7,13 @@ type CommandRunner interface {
 	Run(string, ...string) ([]byte, error)
 }
 
-// CmdRunner is the implementation of Runner, which wraps exec.Command
-type CmdRunner struct{}
+// DefaultCommandRunner is the implementation of Runner, which wraps exec.Command
+type DefaultCommandRunner struct{}
+
+var _ CommandRunner = DefaultCommandRunner{}
 
 // Run executes a command with args
-func (r CmdRunner) Run(command string, args ...string) ([]byte, error) {
+func (r DefaultCommandRunner) Run(command string, args ...string) ([]byte, error) {
 
 	out, err := exec.Command(command, args...).Output()
 
