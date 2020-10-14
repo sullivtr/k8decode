@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/sullivtr/k8decode/internal/executor"
 	"github.com/sullivtr/k8decode/internal/models"
 
 	"github.com/spf13/cobra"
-	"github.com/sullivtr/k8decode/internal/executor"
 	"github.com/sullivtr/k8decode/internal/loader"
 	"github.com/sullivtr/k8decode/internal/secret"
 )
 
 var namespace string
-var cmdRunner executor.CommandRunner
+var cmdRunner executor.CommandRunner = executor.DefaultCommandRunner{}
 
 var K8DecodeCmd = &cobra.Command{
 	Use:   "k8decode",
@@ -47,12 +47,9 @@ func k8decode(args []string) (*models.Secret, error) {
 
 	secretName := args[0]
 
-	if cmdRunner == nil {
-		cmdRunner = &executor.CmdRunner{}
-	}
 	s, err := secret.GetSecret(cmdRunner, namespace, secretName)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to get secret, %s, in namespace: %s", secretName, namespace)
+		return nil, fmt.Errorf("Unable to get secret, %s, in namespace: %s. Error: %s", secretName, namespace, err.Error())
 	}
 
 	secret.PrintDecodedSecret(s)

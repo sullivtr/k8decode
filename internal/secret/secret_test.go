@@ -2,27 +2,36 @@ package secret
 
 import (
 	"encoding/base64"
-	"fmt"
-	"os/exec"
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+	"github.com/sullivtr/k8decode/internal/executor"
 	"github.com/sullivtr/k8decode/internal/models"
-	"gotest.tools/assert"
 )
 
-func TestGetSecretSuccess(t *testing.T) {
+type SecretTestSuite struct {
+	suite.Suite
+}
+
+func TestSecretTestSuite(t *testing.T) {
+	suite.Run(t, new(SecretTestSuite))
+}
+
+func (suite SecretTestSuite) TestGetSecretSuccess() {
 	s, _ := GetSecret(mockCmdRunnerSuccess{}, "testns", "testSecret")
-	assert.Equal(t, s.Data["fakeSecretData"], "fakeSecretValue")
+	suite.Equal(s.Data["fakeSecretData"], "fakeSecretValue")
 }
 
-func TestGetSecretFail(t *testing.T) {
-	_, err := GetSecret(mockCmdRunnerError{}, "testns", "testSecret")
-	assert.ErrorContains(t, err, "Unable to execute command")
+func (suite SecretTestSuite) TestGetSecretFail() {
+	_, err := GetSecret(executor.DefaultCommandRunner{}, "testns", "")
+	suite.Contains(err.Error(), "Error getting secret")
+	suite.Error(err)
 }
 
-func TestGetSecretErrorUnmarshallingYaml(t *testing.T) {
+func (suite SecretTestSuite) TestGetSecretErrorUnmarshallingYaml() {
 	_, err := GetSecret(mockCmdRunnerUnmarshalError{}, "testns", "testSecret")
-	assert.Error(t, err, "Error parsing yaml yaml: unmarshal errors:\n  line 2: cannot unmarshal !!str `notyaml` into models.Secret")
+	suite.Contains(err.Error(), "Error parsing yaml yaml: unmarshal errors:\n  line 2: cannot unmarshal !!str `notyaml` into models.Secret")
+	suite.Error(err)
 }
 
 func TestPrintDecodedSecret(t *testing.T) {
@@ -44,14 +53,6 @@ data:
 `
 	out := []byte(secret)
 	return out, nil
-}
-
-type mockCmdRunnerError struct{}
-
-func (r mockCmdRunnerError) Run(command string, args ...string) ([]byte, error) {
-
-	out, err := exec.Command("notarealcommand").Output()
-	return out, fmt.Errorf("Unable to execute command: %v", err)
 }
 
 type mockCmdRunnerUnmarshalError struct{}

@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/briandowns/spinner v1.11.1
 	github.com/spf13/cobra v1.0.0
+	github.com/stretchr/testify v1.2.2
 	gopkg.in/yaml.v2 v2.3.0
 	gotest.tools v2.2.0+incompatible
 )

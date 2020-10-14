@@ -7,7 +7,7 @@ import (
 )
 
 func TestRunCommand(t *testing.T) {
-	runner := CmdRunner{}
+	runner := DefaultCommandRunner{}
 	out, err := runner.Run("echo", "hello")
 	assert.NilError(t, err)
 	assert.Equal(t, string(out), "hello\n")
