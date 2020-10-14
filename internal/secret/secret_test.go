@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/sullivtr/k8decode/internal/executor"
 	"github.com/sullivtr/k8decode/internal/models"
+	"github.com/sullivtr/k8decode/internal/reader"
 )
 
 type SecretTestSuite struct {
@@ -34,13 +35,17 @@ func (suite SecretTestSuite) TestGetSecretErrorUnmarshallingYaml() {
 	suite.Error(err)
 }
 
-func TestPrintDecodedSecret(t *testing.T) {
+func (suite SecretTestSuite) TestPrintDecodedSecret() {
 	s := models.Secret{
 		Data: map[string]string{},
 	}
 	s.Data["Key"] = base64.StdEncoding.EncodeToString([]byte("value"))
 
-	PrintDecodedSecret(&s)
+	res := reader.ReadStdOut(func() {
+		PrintDecodedSecret(&s)
+	})
+	suite.Contains(res, "Key")
+	suite.Contains(res, "value")
 }
 
 // Mock Cmd Runners
