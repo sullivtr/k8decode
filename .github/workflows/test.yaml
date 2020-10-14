@@ -22,4 +22,12 @@ jobs:
         go-version: 1.14
 
     - name: Run test
-      run: go test ./... -tags test | awk '!/\[no test files\]/ {print}'
+      run: go test ./... -coverprofile=cover.out -tags test | awk '!/\[no test files\]/ {print}'
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./cover.out
+        name: codecov-umbrella
+        fail_ci_if_error: true
