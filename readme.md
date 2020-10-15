@@ -1,6 +1,6 @@
 <div align="center">
   
-  <h1 align="center">K8decode: decode kubernetes secrets</h1>
+  <h1 align="center">K8decode: fetch and decode kubernetes secrets</h1>
 
   [![test][test-image]][test-url]
   [![coverage][cov-image]][cov-url]
