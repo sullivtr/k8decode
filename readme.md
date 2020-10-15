@@ -13,7 +13,6 @@
 </div>
 
 <img src="secretdecode.gif" width="1000"/>
-<!-- ![Demo](secretdecode.gif) -->
 
 ```bash
 k8decode {secret-name} [-n] {namespace}
