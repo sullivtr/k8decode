@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/sullivtr/k8decode/internal/executor"
 	"github.com/sullivtr/k8decode/internal/models"
@@ -25,7 +24,7 @@ var K8DecodeCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := k8decode(args); err != nil {
-			log.Fatalf("Error: %v", err)
+			fmt.Printf("Error %v", err)
 		}
 	},
 }
